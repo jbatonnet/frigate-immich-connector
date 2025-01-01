@@ -24,14 +24,6 @@ IMMICH_ENDPOINT = os.getenv('IMMICH_ENDPOINT', default = 'http://127.0.0.1:2283'
 IMMICH_API_KEY = os.getenv('IMMICH_API_KEY', default = '')
 
 
-LAST_CHECK = 0
-
-if os.path.isfile('last_check'):
-    with open('last_check', 'r') as f:
-        LAST_CHECK = f.read().strip()
-        LAST_CHECK = float(LAST_CHECK)
-
-
 def log(message):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' [frigate-immich-connector] ' + message, flush = True)
 
@@ -310,11 +302,6 @@ def process_event(event):
 
         sublabel_response = requests.post(f'{FRIGATE_ENDPOINT}/api/events/{event_id}/sub_label', data = json.dumps(data))
         sublabel = sublabel_response.json()
-    
-
-    LAST_CHECK = event_start_time
-    with open('last_check', 'w') as f:
-        f.write(str(LAST_CHECK))
 
 
 def main():

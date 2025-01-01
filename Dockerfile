@@ -1,4 +1,5 @@
 # docker build -t ghcr.io/jbatonnet/frigate-immich-connector .
+# docker push ghcr.io/jbatonnet/frigate-immich-connector
 # docker run --rm -it -v .\.env:/usr/src/app/.env ghcr.io/jbatonnet/frigate-immich-connector
 
 FROM python:3
