@@ -8,8 +8,13 @@ import re
 from datetime import datetime
 from dateutil import parser
 
+import paho.mqtt.client as paho
+
 
 dotenv.load_dotenv()
+
+DEBUG = os.getenv('DEBUG', default = '')
+DEBUG = not not DEBUG
 
 FRIGATE_ENDPOINT = os.getenv('FRIGATE_ENDPOINT', default = 'http://127.0.0.1:5000')
 FRIGATE_USERNAME = os.getenv('FRIGATE_USERNAME', default = '')
@@ -19,6 +24,7 @@ FRIGATE_MQTT_HOST = os.getenv('FRIGATE_MQTT_HOST', default = '')
 FRIGATE_MQTT_PORT = os.getenv('FRIGATE_MQTT_PORT', default = '1883')
 FRIGATE_MQTT_USERNAME = os.getenv('FRIGATE_MQTT_USERNAME', default = '')
 FRIGATE_MQTT_PASSWORD = os.getenv('FRIGATE_MQTT_PASSWORD', default = '')
+FRIGATE_MQTT_TOPIC = os.getenv('FRIGATE_MQTT_TOPIC', default = 'frigate')
 
 IMMICH_ENDPOINT = os.getenv('IMMICH_ENDPOINT', default = 'http://127.0.0.1:2283')
 IMMICH_API_KEY = os.getenv('IMMICH_API_KEY', default = '')
@@ -124,6 +130,43 @@ def initialize():
             camera_albums[camera] = album
 
             log(f'Created album {album["name"]} ({album["id"]}) for camera {camera}')
+
+def subscribe_mqtt():
+
+    def mqtt_on_connect(client, userdata, flags, reason_code, properties):
+        client.subscribe(f'{FRIGATE_MQTT_TOPIC}/events')
+        
+        if DEBUG:
+            log('Connected to MQTT successfully')
+
+    def mqtt_on_connect_fail(client, userdata):
+        log('MQTT connection failed')
+        exit(1)
+
+    def mqtt_on_log(client, userdata, level, buf):
+        if DEBUG:
+            log(buf)
+
+    def mqtt_on_message(client, userdata, msg):
+        payload = json.loads(msg.payload)
+        event = payload['after']
+
+        if DEBUG:
+            log('Received MQTT event')
+
+        process_event(event)
+
+    client = paho.Client(protocol = paho.MQTTv5)
+    client.on_connect = mqtt_on_connect
+    client.on_connect_fail = mqtt_on_connect_fail
+    client.on_message = mqtt_on_message
+    client.on_log = mqtt_on_log
+
+    if FRIGATE_MQTT_USERNAME:
+        client.username_pw_set(FRIGATE_MQTT_USERNAME, FRIGATE_MQTT_PASSWORD)
+
+    client.connect(FRIGATE_MQTT_HOST, int(FRIGATE_MQTT_PORT))
+    client.loop_start()
 
 def fetch_events():
     global camera_albums
@@ -314,8 +357,13 @@ def main():
     initialize()
 
     # If we have MQTT, fetch once and wait for events
-    if False and FRIGATE_MQTT_HOST:
+    if FRIGATE_MQTT_HOST:
         fetch_events()
+        subscribe_mqtt()
+
+        while True:
+            time.sleep(300)
+            fetch_events()
 
     # If we don't have MQTT, let's poll Frigate regularly
     else:
