@@ -234,6 +234,19 @@ def process_event(event):
     event_snapshot_response = requests.get(f'{FRIGATE_ENDPOINT}/api/events/{event_id}/snapshot.jpg')
     event_snapshot = event_snapshot_response.content
 
+    if len(event_snapshot) < 100:
+        try:
+            error_json = event_snapshot_response.json()
+            
+            if DEBUG:
+                log(f'/!\\ Could not process event {event_id}: error_json')
+            return
+
+        except:
+            if DEBUG:
+                log(f'/!\\ Could not process event {event_id}')
+            return
+
 
     ################
     # Upload to Immich
