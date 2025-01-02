@@ -320,10 +320,13 @@ def process_event(event):
     done = False
 
     while not done:
+        time.sleep(0.25)
+
         jobs_status_response = requests.get(f'{IMMICH_ENDPOINT}/api/jobs', headers = headers)
         jobs_status = jobs_status_response.json()
 
-        done = not jobs_status['faceDetection']['queueStatus']['isActive']
+        status = [ j['queueStatus']['isActive'] for j in jobs_status.values() ]
+        done = not any(status)
 
 
     ################
