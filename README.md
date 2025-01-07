@@ -9,13 +9,14 @@ You can run the script or use the docker container.
 
 You will need the following environment variables:
 - **DEBUG** (optional): Enable verbose log output
-- **EVENTS_LIMIT** (optional): Maximum number of events being fetched at once (default: 100)
-- **FRIGATE_ENDPOINT**: Endpoint of your Frigate instance (ex: `http://my-frigate:5000`)
-- **FRIGATE_MQTT_HOST** (optional): If specified, will subscribe to the MQTT isntance (ex: `my-mqtt`)
-- **FRIGATE_MQTT_PORT** (optional): Self-explanatory
+- **EVENTS_LIMIT** (optional): Maximum number of events being fetched at once (default: `100`)
+- **LABEL_FILTER** (optional): Filter Frigate events with this label. Set empty to disable fitlering (default: `person`)
+- **FRIGATE_ENDPOINT**: Endpoint of your Frigate instance (default: `http://127.0.0.1:5000`)
+- **FRIGATE_MQTT_HOST** (optional): If specified, will subscribe to the MQTT instance (ex: `my-mqtt`)
+- **FRIGATE_MQTT_PORT** (optional): Self-explanatory (default: `1883`)
 - **FRIGATE_MQTT_USERNAME** (optional): Self-explanatory
 - **FRIGATE_MQTT_PASSWORD** (optional): Self-explanatory
-- **FRIGATE_MQTT_TOPIC** (optional): The base topic for Frigate on this MQTT instance (ex: `frigate`)
+- **FRIGATE_MQTT_TOPIC** (optional): The base topic for Frigate on this MQTT instance (default: `frigate`)
 - **IMMICH_ENDPOINT**: Endpoint of your Immich instance (ex: `http://my-immich`)
 - **IMMICH_API_KEY**: Immich API key generated from `Account settings` > `API Keys`
 

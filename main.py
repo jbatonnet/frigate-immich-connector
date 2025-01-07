@@ -17,6 +17,8 @@ DEBUG = os.getenv('DEBUG', default = '')
 DEBUG = not not DEBUG
 
 EVENTS_LIMIT = os.getenv('EVENTS_LIMIT', default = '100')
+LABEL_FILTER = os.getenv('LABEL_FILTER', default = 'person')
+
 EVENTS_LIMIT = int(EVENTS_LIMIT)
 
 FRIGATE_ENDPOINT = os.getenv('FRIGATE_ENDPOINT', default = 'http://127.0.0.1:5000')
@@ -205,7 +207,9 @@ def fetch_events():
         # List events from Frigate
         # - https://docs.frigate.video/integrations/api/#get-apievents
 
-        events_response = requests.get(f'{FRIGATE_ENDPOINT}/api/events?has_snapshot=1&cameras={camera}&after={last_check + 0.001}&limit={EVENTS_LIMIT}')
+        label_filter = f'&labels={LABEL_FILTER}' if LABEL_FILTER else ''
+
+        events_response = requests.get(f'{FRIGATE_ENDPOINT}/api/events?has_snapshot=1&cameras={camera}&after={last_check + 0.001}&limit={EVENTS_LIMIT}{label_filter}')
         events = events_response.json()
 
         if len(events) == 0:
@@ -220,6 +224,11 @@ def fetch_events():
 
 def process_event(event):
     global camera_albums
+
+    if LABEL_FILTER:
+        label = event['label']
+        if LABEL_FILTER not in label:
+            return
 
     camera = event['camera']
     album = camera_albums[camera]
