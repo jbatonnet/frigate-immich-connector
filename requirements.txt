@@ -2,3 +2,4 @@ requests
 python-dotenv
 python-dateutil
 paho-mqtt
+pillow

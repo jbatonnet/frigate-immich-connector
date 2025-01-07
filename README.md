@@ -11,6 +11,7 @@ You will need the following environment variables:
 - **DEBUG** (optional): Enable verbose log output
 - **EVENTS_LIMIT** (optional): Maximum number of events being fetched at once (default: `100`)
 - **LABEL_FILTER** (optional): Filter Frigate events with this label. Set empty to disable fitlering (default: `person`)
+- **CROP_SNAPSHOT** (optional): Enable croping snapshot to the Frigate detected region (default: `1`)
 - **FRIGATE_ENDPOINT**: Endpoint of your Frigate instance (default: `http://127.0.0.1:5000`)
 - **FRIGATE_MQTT_HOST** (optional): If specified, will subscribe to the MQTT instance (ex: `my-mqtt`)
 - **FRIGATE_MQTT_PORT** (optional): Self-explanatory (default: `1883`)

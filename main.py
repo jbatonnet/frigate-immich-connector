@@ -4,11 +4,13 @@ import json
 import dotenv
 import time
 import re
+import io
 
 from datetime import datetime
 from dateutil import parser
 
 import paho.mqtt.client as paho
+from PIL import Image
 
 
 dotenv.load_dotenv()
@@ -18,8 +20,10 @@ DEBUG = not not DEBUG
 
 EVENTS_LIMIT = os.getenv('EVENTS_LIMIT', default = '100')
 LABEL_FILTER = os.getenv('LABEL_FILTER', default = 'person')
+CROP_SNAPSHOT = os.getenv('LABEL_FILTER', default = '1')
 
 EVENTS_LIMIT = int(EVENTS_LIMIT)
+CROP_SNAPSHOT = not not CROP_SNAPSHOT
 
 FRIGATE_ENDPOINT = os.getenv('FRIGATE_ENDPOINT', default = 'http://127.0.0.1:5000')
 FRIGATE_USERNAME = os.getenv('FRIGATE_USERNAME', default = '')
@@ -259,6 +263,19 @@ def process_event(event):
                 log(f'/!\\ Could not process event {event_id}')
             return
 
+    ################
+    # Crop snapshot to detection region
+
+    if CROP_SNAPSHOT and 'data' in event and 'box' in event['data']:
+        box = event['data']['box']
+
+        image = Image.open(io.BytesIO(event_snapshot))
+        image = image.crop((image.width * box[0], image.height * box[1], image.width * (box[0] + box[2]), image.height * (box[1] + box[3])))
+
+        event_snapshot = io.BytesIO()
+        image.save(event_snapshot, format = 'JPEG')
+        event_snapshot = event_snapshot.getvalue()
+
 
     ################
     # Upload to Immich
@@ -382,7 +399,7 @@ def process_event(event):
     if FRIGATE_MQTT_HOST:
 
         def mqtt_on_connect(client, userdata, flags, reason_code, properties):
-            client.publish(f'{FRIGATE_MQTT_TOPIC}/sub_label', event)
+            client.publish(f'{FRIGATE_MQTT_TOPIC}/sub_label', json.dumps(event))
             client.loop_stop()
 
         def mqtt_on_log(client, userdata, level, buf):
