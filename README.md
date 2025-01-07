@@ -9,6 +9,7 @@ You can run the script or use the docker container.
 
 You will need the following environment variables:
 - **DEBUG** (optional): Enable verbose log output
+- **EVENTS_LIMIT** (optional): Maximum number of events being fetched at once (default: 100)
 - **FRIGATE_ENDPOINT**: Endpoint of your Frigate instance (ex: `http://my-frigate:5000`)
 - **FRIGATE_MQTT_HOST** (optional): If specified, will subscribe to the MQTT isntance (ex: `my-mqtt`)
 - **FRIGATE_MQTT_PORT** (optional): Self-explanatory

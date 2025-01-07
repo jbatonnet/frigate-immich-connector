@@ -16,6 +16,9 @@ dotenv.load_dotenv()
 DEBUG = os.getenv('DEBUG', default = '')
 DEBUG = not not DEBUG
 
+EVENTS_LIMIT = os.getenv('EVENTS_LIMIT', default = '100')
+EVENTS_LIMIT = int(EVENTS_LIMIT)
+
 FRIGATE_ENDPOINT = os.getenv('FRIGATE_ENDPOINT', default = 'http://127.0.0.1:5000')
 FRIGATE_USERNAME = os.getenv('FRIGATE_USERNAME', default = '')
 FRIGATE_PASSWORD =  os.getenv('FRIGATE_PASSWORD', default = '')
@@ -202,7 +205,7 @@ def fetch_events():
         # List events from Frigate
         # - https://docs.frigate.video/integrations/api/#get-apievents
 
-        events_response = requests.get(f'{FRIGATE_ENDPOINT}/api/events?has_snapshot=1&cameras={camera}&after={last_check + 0.001}')
+        events_response = requests.get(f'{FRIGATE_ENDPOINT}/api/events?has_snapshot=1&cameras={camera}&after={last_check + 0.001}&limit={EVENTS_LIMIT}')
         events = events_response.json()
 
         if len(events) == 0:
