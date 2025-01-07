@@ -351,6 +351,7 @@ def process_event(event):
     for person in asset_people:
 
         person_name = person['name']
+        event['sub_label'] = [ person_name, 1 ]
 
         log(f'  Found {person_name}')
 
@@ -362,6 +363,30 @@ def process_event(event):
         sublabel_response = requests.post(f'{FRIGATE_ENDPOINT}/api/events/{event_id}/sub_label', data = json.dumps(data))
         sublabel = sublabel_response.json()
 
+    ################
+    # Publish to MQTT if available
+    # - https://docs.frigate.video/integrations/mqtt/#frigateevents
+
+    if FRIGATE_MQTT_HOST:
+
+        def mqtt_on_connect(client, userdata, flags, reason_code, properties):
+            client.publish(f'{FRIGATE_MQTT_TOPIC}/sub_label', event)
+            client.loop_stop()
+
+        def mqtt_on_log(client, userdata, level, buf):
+            if DEBUG:
+                log(buf)
+
+        client = paho.Client(protocol = paho.MQTTv5)
+        client.on_connect = mqtt_on_connect
+        client.on_log = mqtt_on_log
+
+        if FRIGATE_MQTT_USERNAME:
+            client.username_pw_set(FRIGATE_MQTT_USERNAME, FRIGATE_MQTT_PASSWORD)
+
+        client.connect(FRIGATE_MQTT_HOST, int(FRIGATE_MQTT_PORT))
+        client.loop_start()
+        
 
 def main():
 
