@@ -380,6 +380,9 @@ def process_event(event):
     for person in asset_people:
 
         person_name = person['name']
+        if not person_name:
+            continue
+
         event['sub_label'] = [ person_name, 1 ]
 
         log(f'  Found {person_name}')
